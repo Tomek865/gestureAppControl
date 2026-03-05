@@ -23,8 +23,7 @@ class AirHockeyEnv(gym.Env):
 
         # AI continously controls speed < -1 ; 1 >
         # [vel_x, vel_y]
-        self.action_space = spaces.Box(
-            low=-1, high=1, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
 
         #  [puck_x, puck_y, puck_vx, puck_vy, ai_x, ai_y]
         self.observation_space = spaces.Box(
@@ -64,11 +63,21 @@ class AirHockeyEnv(gym.Env):
         else:
             reward = -0.001
 
-            # maybe add TODO
-        if self.game.puck_player_collision(
-            self.game.player.get_player_pos(), self.game.player.get_player_size()
+        # puck go left after collide
+        puck_vect_norm_x = self.game.puck.get_puck_vect()[0][0]
+        if (
+            self.game.puck_player_collision(
+                self.game.player.get_player_pos(), self.game.player.get_player_size()
+            )
+            and -1 <= puck_vect_norm_x < 0
         ):
-            reward += 0.27
+            reward += 0.3
+
+        (top, bottom, left, right, _) = self.board.get_board_bounds()
+        size = self.game.player.get_player_size()
+        max_x = right - size
+        if self.game.player.get_player_pos()[0] == max_x:
+            reward -= 0.005
 
         # 3. stuck safety (Truncation)
         if self.current_step >= self.max_steps:
