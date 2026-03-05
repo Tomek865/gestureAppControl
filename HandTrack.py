@@ -16,5 +16,6 @@ while True:
         for hand in results.multi_hand_landmarks:
             mpDraw.draw_landmarks(img, hand, mpHands.HAND_CONNECTIONS)
 
+    cv2.flip(img, 0)
     cv2.imshow("Image", img)
     cv2.waitKey(1)
