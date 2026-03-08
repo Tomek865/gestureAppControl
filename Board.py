@@ -42,6 +42,20 @@ class Board:
     def update_board_size(self):
         self.set_all()
 
+    def draw_dashed_line(self, surf, color, start_pos, end_pos, width=1, dash_length=10, space=5):
+        origin = pg.math.Vector2(start_pos)
+        target = pg.math.Vector2(end_pos)
+        displacement = target - origin
+        length = displacement.length()
+        
+        if length <= 0: return
+
+        slope = displacement / length
+        for i in range(0, int(length), dash_length + space):
+            start = origin + slope * i
+            end = origin + slope * min(i + dash_length, length)
+            pg.draw.line(surf, color, start, end, width)
+
     def draw(self):
         color = UI_settings.get_board_line_color()
         width = 5
@@ -140,4 +154,24 @@ class Board:
             UI_settings.get_middle_line_color(),
             self.middle_line_start,
             self.middle_line_end,
+        )
+
+        self.draw_dashed_line(
+            self.screen, 
+            "yellow", 
+            (self.left, self.goal_top_y), 
+            (self.left, self.goal_bottom_y), 
+            width=2, 
+            dash_length=10, 
+            space=8
+        )
+
+        self.draw_dashed_line(
+            self.screen, 
+            "yellow", 
+            (self.right, self.goal_top_y), 
+            (self.right, self.goal_bottom_y), 
+            width=2, 
+            dash_length=10, 
+            space=8
         )
