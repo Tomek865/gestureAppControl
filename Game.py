@@ -202,13 +202,15 @@ class Game:
 
     def check_goal_left(self):
         p_pos = self.puck.get_puck_pos()
+        p_size = self.puck.get_puck_size()
         limit = self.board.left - self.board.get_goal_depth()
-        return p_pos[0] < limit
+        return p_pos[0]-p_size < limit
 
     def check_goal_right(self):
         p_pos = self.puck.get_puck_pos()
+        p_size = self.puck.get_puck_size()
         limit = self.board.right + self.board.get_goal_depth()
-        return p_pos[0] > limit
+        return p_pos[0]+p_size > limit
 
     def on_display_resize(self):
         self.player.update_player_size()

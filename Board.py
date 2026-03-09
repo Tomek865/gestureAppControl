@@ -149,12 +149,16 @@ class Board:
             width,
         )
 
-        pg.draw.line(
-            self.screen,
-            UI_settings.get_middle_line_color(),
+        self.draw_dashed_line(
+            self.screen, 
+            color,
             self.middle_line_start,
             self.middle_line_end,
+            width=2, 
+            dash_length=10, 
+            space=8
         )
+
 
         self.draw_dashed_line(
             self.screen, 

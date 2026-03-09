@@ -55,6 +55,8 @@ class Puck:
     def reset(self, mode):
         self.puck_pos_curr = (self.screen_size[0] / 2, self.screen_size[1] / 2)
         self.puck_pos_last = (self.screen_size[0] / 2, self.screen_size[1] / 2)
+        self.puck_vector_normalized = pg.Vector2(0.0, 0.0)
+        self.puck_vector_len = 0.0
         if mode == "training":
             random_x = random.uniform(-1, 1)
             random_y = random.uniform(-1, 1)
