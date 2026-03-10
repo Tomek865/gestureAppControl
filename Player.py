@@ -40,7 +40,9 @@ class Player:
             return
         self.player_pos_last = self.player_pos_curr.copy()
         mouse_pos = pg.mouse.get_pos()
-        update_vect = pg.Vector2(pg.Vector2(mouse_pos[0], mouse_pos[1]) - self.player_pos_last)
+        update_vect = pg.Vector2(
+            pg.Vector2(mouse_pos[0], mouse_pos[1]) - self.player_pos_last
+        )
         if update_vect.length() > self.max_player_speed:
             update_vect = update_vect.normalize() * self.max_player_speed
         self.player_pos_curr = self.player_pos_last + update_vect
@@ -67,6 +69,9 @@ class Player:
 
     def get_player_pos(self):
         return self.player_pos_curr
+
+    def get_player_last_pos(self):
+        return self.player_pos_last
 
     def set_player_pos(self, new_pos):
         self.player_pos_curr = new_pos

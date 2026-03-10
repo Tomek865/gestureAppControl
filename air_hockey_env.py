@@ -23,7 +23,8 @@ class AirHockeyEnv(gym.Env):
 
         # AI continously controls speed < -1 ; 1 >
         # [vel_x, vel_y]
-        self.action_space = spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(
+            low=-1, high=1, shape=(2,), dtype=np.float32)
 
         #  [puck_x, puck_y, puck_vx, puck_vy, ai_x, ai_y]
         self.observation_space = spaces.Box(
@@ -65,6 +66,7 @@ class AirHockeyEnv(gym.Env):
 
         # Reward for moving towards the puck using its position history
         player_pos = self.game.player.get_player_pos()
+        player_pos_last = self.game.player.get_player_last_pos()
         puck_curr = self.game.puck.puck_pos_curr
         puck_last = self.game.puck.puck_pos_last
 
@@ -80,6 +82,12 @@ class AirHockeyEnv(gym.Env):
             and -1 <= puck_vect_norm_x < 0
         ):
             reward += 0.3
+
+        if puck_curr == puck_last:
+            reward -= 0.5
+
+        if player_pos_last == player_pos:
+            reward -= 1
 
         (top, bottom, left, right, _) = self.game.board.get_board_bounds()
         size = self.game.player.get_player_size()
