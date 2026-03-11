@@ -56,10 +56,10 @@ class AirHockeyEnv(gym.Env):
         truncated = False
 
         if game_result == 1:
-            reward = 10.0
+            reward += 50.0
             terminated = True
         elif game_result == -1:
-            reward = -10.0
+            reward -= 50.0
             terminated = True
         else:
             reward = -0.001
@@ -93,13 +93,13 @@ class AirHockeyEnv(gym.Env):
         size = self.game.player.get_player_size()
         max_x = right - size
         if self.game.player.get_player_pos()[0] == max_x:
-            reward -= 0.005
+            reward -= 0.05
 
         # 3. stuck safety (Truncation)
         if self.current_step >= self.max_steps:
             truncated = True
             # punish for not doing anything
-            reward -= 5
+            # reward -= 5
 
         # 4. observation after move
         observation = self._get_obs()

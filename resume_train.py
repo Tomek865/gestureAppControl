@@ -7,7 +7,7 @@ log_dir = "logs"
 
 env = AirHockeyEnv()
 env.reset()
-model_path = f"{models_dir}/560000.zip"
+model_path = f"{models_dir}/1190000.zip"
 
 model = PPO.load(model_path, env=env, tensorboard_log=log_dir)
 
