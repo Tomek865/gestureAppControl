@@ -14,7 +14,7 @@ if not os.path.exists(log_dir):
 env = AirHockeyEnv()
 env.reset()
 
-model = PPO("MlpPolicy", env, verbose=1, tensorboard_log=log_dir)
+model = PPO("MlpPolicy", env, gamma=0.999, verbose=1, tensorboard_log=log_dir)
 
 TIMESTEPS = 10000
 iters = 0

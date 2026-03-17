@@ -23,8 +23,7 @@ class AirHockeyEnv(gym.Env):
 
         # AI continously controls speed < -1 ; 1 >
         # [vel_x, vel_y]
-        self.action_space = spaces.Box(
-            low=-1, high=1, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
 
         #  [puck_x, puck_y, puck_vx, puck_vy, ai_x, ai_y]
         self.observation_space = spaces.Box(
@@ -101,6 +100,13 @@ class AirHockeyEnv(gym.Env):
 
         if pos_y - size <= top + 10 or pos_y + size >= bottom - 10:
             reward -= 0.005
+
+        opponent_goal = pg.math.Vector2(0, h / 2)
+        old_distance = pg.math.Vector2(puck_last).distance_to(opponent_goal)
+        new_distance = pg.math.Vector2(puck_curr).distance_to(opponent_goal)
+
+        if new_distance < old_distance:
+            reward += 0.005
 
         if self.current_step >= self.max_steps:
             reward -= 100
