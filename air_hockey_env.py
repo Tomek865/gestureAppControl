@@ -23,8 +23,7 @@ class AirHockeyEnv(gym.Env):
 
         # AI continously controls speed < -1 ; 1 >
         # [vel_x, vel_y]
-        self.action_space = spaces.Box(
-            low=-1, high=1, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
 
         #  [puck_x, puck_y, puck_vx, puck_vy, ai_x, ai_y]
         self.observation_space = spaces.Box(
@@ -58,19 +57,18 @@ class AirHockeyEnv(gym.Env):
             reward += 50.0
             terminated = True
         elif game_result == -1:
-            reward -= 50.0
+            reward -= 20.0  # later change back to -50
             terminated = True
         else:
             reward += 0.001
 
-        player_pos = self.game.player.get_player_pos()
         puck_curr = self.game.puck.puck_pos_curr
         puck_last = self.game.puck.puck_pos_last
+        player_pos_last = pg.math.Vector2(self.game.player.get_player_last_pos())
+        player_pos_curr = pg.math.Vectro2(self.game.player.get_player_pos())
 
         if pg.math.Vector2(puck_curr).distance_to(pg.math.Vector2(puck_last)) < 0.5:
-            reward -= 0.01
-
-        puck_vect_norm_x = self.game.puck.get_puck_vect()[0][0]
+            reward -= 0.05
 
         if self.game.puck_player_collision(
             self.game.player.get_player_pos(), self.game.player.get_player_size()
@@ -86,6 +84,10 @@ class AirHockeyEnv(gym.Env):
 
         if puck_curr[0] > w / 2:
             reward -= 0.005
+            old_distance = player_pos_last.distance_to(pg.math.Vector2(puck_last))
+            new_distance = player_pos_curr.distance_to(pg.math.Vector2(puck_curr))
+            if new_distance < old_distance:
+                reward += 0.01
         elif puck_curr[0] < w / 2:
             defense_line = w * 0.75
             if self.game.player.get_player_pos()[0] < defense_line:
