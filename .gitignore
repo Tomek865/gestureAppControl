@@ -57,3 +57,7 @@ htmlcov/
 # --- Logi ---
 
 *.log
+
+# --- Events i models ---
+events.out.tfevents.*
+models/**/*.zip

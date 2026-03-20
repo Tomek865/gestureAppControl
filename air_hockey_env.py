@@ -65,7 +65,7 @@ class AirHockeyEnv(gym.Env):
         puck_curr = self.game.puck.puck_pos_curr
         puck_last = self.game.puck.puck_pos_last
         player_pos_last = pg.math.Vector2(self.game.player.get_player_last_pos())
-        player_pos_curr = pg.math.Vectro2(self.game.player.get_player_pos())
+        player_pos_curr = pg.math.Vector2(self.game.player.get_player_pos())
 
         if pg.math.Vector2(puck_curr).distance_to(pg.math.Vector2(puck_last)) < 0.5:
             reward -= 0.05
@@ -134,48 +134,47 @@ class AirHockeyEnv(gym.Env):
     def close(self):
         pg.quit()
 
+    def _get_obs(self):
+        """Pobiera i normalizuje dane dla AI (Wersja 12-parametrowa)."""
+        puck = self.game.puck
+        ai = self.game.player
+        opp = self.game.opponent
 
-def _get_obs(self):
-    """Pobiera i normalizuje dane dla AI (Wersja 12-parametrowa)."""
-    puck = self.game.puck
-    ai = self.game.player
-    opp = self.game.opponent
+        w, h = Screen_helper.get_size()
 
-    w, h = Screen_helper.get_size()
+        # Dane krążka
+        p_pos = puck.get_puck_pos()
+        p_norm_vec, p_speed = puck.get_puck_vect()
 
-    # Dane krążka
-    p_pos = puck.get_puck_pos()
-    p_norm_vec, p_speed = puck.get_puck_vect()
+        # Dane AI (Twój bot)
+        ai_pos = ai.get_player_pos()
+        # Obliczamy prędkość AI na podstawie różnicy pozycji (klasyczny wektor przesunięcia)
+        ai_last = ai.get_player_last_pos()
+        ai_vel_x = ai_pos[0] - ai_last[0]
+        ai_vel_y = ai_pos[1] - ai_last[1]
 
-    # Dane AI (Twój bot)
-    ai_pos = ai.get_player_pos()
-    # Obliczamy prędkość AI na podstawie różnicy pozycji (klasyczny wektor przesunięcia)
-    ai_last = ai.get_player_last_pos()
-    ai_vel_x = ai_pos[0] - ai_last[0]
-    ai_vel_y = ai_pos[1] - ai_last[1]
+        # Dane Przeciwnika (Nauczyciel)
+        opp_pos = opp.get_player_pos()
+        opp_last = opp.get_player_last_pos()
+        opp_vel_x = opp_pos[0] - opp_last[0]
+        opp_vel_y = opp_pos[1] - opp_last[1]
 
-    # Dane Przeciwnika (Nauczyciel)
-    opp_pos = opp.get_player_pos()
-    opp_last = opp.get_player_last_pos()
-    opp_vel_x = opp_pos[0] - opp_last[0]
-    opp_vel_y = opp_pos[1] - opp_last[1]
+        obs = np.array(
+            [
+                float(p_pos[0]) / w,  # 1. Puck X
+                float(p_pos[1]) / h,  # 2. Puck Y
+                float(p_norm_vec[0] * p_speed) / 20.0,  # 3. Puck Vx
+                float(p_norm_vec[1] * p_speed) / 20.0,  # 4. Puck Vy
+                float(ai_pos[0]) / w,  # 5. AI X
+                float(ai_pos[1]) / h,  # 6. AI Y
+                float(ai_vel_x) / 15.0,  # 7. AI Vx (dzielone przez speed_limit)
+                float(ai_vel_y) / 15.0,  # 8. AI Vy
+                float(opp_pos[0]) / w,  # 9. Opponent X
+                float(opp_pos[1]) / h,  # 10. Opponent Y
+                float(opp_vel_x) / 15.0,  # 11. Opponent Vx
+                float(opp_vel_y) / 15.0,  # 12. Opponent Vy
+            ],
+            dtype=np.float32,
+        )
 
-    obs = np.array(
-        [
-            float(p_pos[0]) / w,  # 1. Puck X
-            float(p_pos[1]) / h,  # 2. Puck Y
-            float(p_norm_vec[0] * p_speed) / 20.0,  # 3. Puck Vx
-            float(p_norm_vec[1] * p_speed) / 20.0,  # 4. Puck Vy
-            float(ai_pos[0]) / w,  # 5. AI X
-            float(ai_pos[1]) / h,  # 6. AI Y
-            float(ai_vel_x) / 15.0,  # 7. AI Vx (dzielone przez speed_limit)
-            float(ai_vel_y) / 15.0,  # 8. AI Vy
-            float(opp_pos[0]) / w,  # 9. Opponent X
-            float(opp_pos[1]) / h,  # 10. Opponent Y
-            float(opp_vel_x) / 15.0,  # 11. Opponent Vx
-            float(opp_vel_y) / 15.0,  # 12. Opponent Vy
-        ],
-        dtype=np.float32,
-    )
-
-    return obs
+        return obs
