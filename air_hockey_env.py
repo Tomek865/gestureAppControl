@@ -42,7 +42,7 @@ class AirHockeyEnv(gym.Env):
 
         return self._get_obs(), {}
 
-    def step(self, action):
+  #  def step(self, action):
         self.current_step += 1
 
         # 1. ai step
@@ -100,6 +100,98 @@ class AirHockeyEnv(gym.Env):
         pos_y = self.game.player.get_player_pos()[1]
         if pos_x >= max_x - 10:
             reward -= 0.005
+
+        if pos_y - size <= top + 10 or pos_y + size >= bottom - 10:
+            reward -= 0.005
+
+        opponent_goal = pg.math.Vector2(0, h / 2)
+        old_distance = pg.math.Vector2(puck_last).distance_to(opponent_goal)
+        new_distance = pg.math.Vector2(puck_curr).distance_to(opponent_goal)
+
+        if new_distance < old_distance:
+            reward += 0.005
+
+        if self.current_step >= self.max_steps:
+            reward -= 100
+            truncated = True
+
+        observation = self._get_obs()
+
+        return observation, reward, terminated, truncated, {}
+
+    def step(self, action):
+        self.current_step += 1
+
+        # 1. ai step
+        game_result = self.game.run_frame_ai(action)
+
+        # 2. (Reward Shaping)
+        reward = 0
+        terminated = False
+        truncated = False
+
+        if game_result == 1:
+            reward += 50.0
+            terminated = True
+        elif game_result == -1:
+            reward -= 20.0
+            terminated = True
+        # USUNIĘTO: reward += 0.001 (to uczyło go, że stanie w miejscu daje zysk)
+
+        puck_curr = self.game.puck.puck_pos_curr
+        puck_last = self.game.puck.puck_pos_last
+        player_pos_last = pg.math.Vector2(self.game.player.get_player_last_pos())
+        player_pos_curr = pg.math.Vector2(self.game.player.get_player_pos())
+        w, h = Screen_helper.get_size()
+        pos_x = player_pos_curr[0]
+        pos_y = player_pos_curr[1]
+
+        # --- NOWE: ANTY-KAMPIENIE I ANTY-WIBRACJE ---
+        player_movement = player_pos_curr.distance_to(player_pos_last)
+
+        # 1. Kara za wibracje (rusza się o kilka pikseli) vs Nagroda za dynamikę
+        if player_movement < 3.0:
+            reward -= 0.2  # Bolesna kara za stanie w miejscu / mikroruchy
+        else:
+            reward += 0.02  # Mała zachęta do szerokiego latania po planszy
+
+        # 2. Drastyczna kara za kampienie w bramce (zakładamy, że >85% szerokości to obrona)
+        if pos_x > w * 0.85:
+            reward -= 0.5  # Wypędzenie z pola bramkowego
+
+        # --- RESZTA TWOJEJ LOGIKI ---
+        if pg.math.Vector2(puck_curr).distance_to(pg.math.Vector2(puck_last)) < 0.5:
+            reward -= 0.05
+
+        if self.game.puck_player_collision(
+                self.game.player.get_player_pos(), self.game.player.get_player_size()
+        ):
+            norm_x = self.game.puck.get_puck_vect()[0][0]
+            speed = self.game.puck.get_puck_vect()[1]
+            real_speed = norm_x * speed
+
+            if real_speed < 0:
+                reward += abs(real_speed) * 0.05
+
+        if puck_curr[0] > w / 2:
+            old_distance = player_pos_last.distance_to(pg.math.Vector2(puck_last))
+            new_distance = player_pos_curr.distance_to(pg.math.Vector2(puck_curr))
+            if new_distance < old_distance:
+                reward += 0.01
+            else:
+                reward -= 0.02  # DODAŁEM: Kara za uciekanie od krążka na własnej połowie
+        elif puck_curr[0] < w / 2:
+            defense_line = w * 0.75
+            if pos_x < defense_line:
+                reward -= 0.005
+
+        (top, bottom, left, right, _) = self.game.board.get_board_bounds()
+        size = self.game.player.get_player_size()
+        max_x = right - size
+
+        # Zwiększona kara za dotykanie tylnej bandy (bramki)
+        if pos_x >= max_x - 10:
+            reward -= 0.5  # Wcześniej było 0.005, teraz to mocno boli
 
         if pos_y - size <= top + 10 or pos_y + size >= bottom - 10:
             reward -= 0.005
