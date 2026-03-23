@@ -2,7 +2,7 @@ import pygame as pg
 
 from Screen_helper import Screen_helper
 from UI_settings import UI_settings
-
+from gesture_controll import HandTracker
 
 class Player:
     def __init__(self, side="left", is_ai=False):
@@ -29,6 +29,7 @@ class Player:
         )
 
         self.speed_limit = 15
+        self.tracker = HandTracker(model_path='best_openvino_model')
 
     def reset(self):
         self.player_pos_curr = self.start_pos.copy()
@@ -39,9 +40,11 @@ class Player:
         if self.is_ai:
             return
         self.player_pos_last = self.player_pos_curr.copy()
-        mouse_pos = pg.mouse.get_pos()
+
+        pos = self.tracker.get_position()
+
         update_vect = pg.Vector2(
-            pg.Vector2(mouse_pos[0], mouse_pos[1]) - self.player_pos_last
+            pg.Vector2(pos[0], pos[1]) - self.player_pos_last
         )
         if update_vect.length() > self.max_player_speed:
             update_vect = update_vect.normalize() * self.max_player_speed
