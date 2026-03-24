@@ -159,8 +159,8 @@ class Game:
         o_pos = self.opponent.get_player_pos()
         mid_x = self.board.middle_line_start[0] + 20
         center_y = self.board.top + (self.board.board_size[1] / 2)
-        speed = 0.4  # was 0.8
-        slower_speed = 0.2  # was 0.5
+        speed = 0.6  # was 0.8
+        slower_speed = 0.4  # was 0.5
         vx, vy = 0, 0
 
         if p_pos[0] < mid_x:

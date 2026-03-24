@@ -10,7 +10,7 @@ env = AirHockeyEnv()
 env.reset()
 
 # 1. TUTAJ WPISUJESZ NUMER MODELU DO ZAŁADOWANIA
-STARTING_STEP = 11450000
+STARTING_STEP = 5000000
 model_path = f"{models_dir}/{STARTING_STEP}.zip"
 
 # Ładowanie
