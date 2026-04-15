@@ -29,7 +29,7 @@ class Player:
         )
 
         self.speed_limit = 15
-        self.tracker = HandTracker(model_path='best_openvino_model')
+        self.tracker = HandTracker()
 
     def reset(self):
         self.player_pos_curr = self.start_pos.copy()

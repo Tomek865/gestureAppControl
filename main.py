@@ -3,7 +3,7 @@ import pygame as pg
 from Game import Game
 from Screen_helper import Screen_helper
 from UI_settings import UI_settings
-from gesture_controll import HandTracker
+
 pg.init()
 screen = pg.display.set_mode(UI_settings.get_screen_start_size(), pg.RESIZABLE)
 screen_size = pg.display.get_window_size()
